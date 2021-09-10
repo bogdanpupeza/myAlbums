@@ -19,28 +19,17 @@ class AlbumsRepository{
     var _lastUpdate;
     var albums = await albumsService.getAlbums().
     onError(
-        (error, stackTrace){
+        (error, stackTrace)async {
           print(error);
           _isError = true;
-          return albumsCache.getAlbums();
+          return await albumsCache.getAlbums();
         }
       ).whenComplete((){
         if(_isError == false) {
           _lastUpdate = DateTime.now();
         }
       });
-
-
-
-
-    var albumsStream = Stream.fromIterable([albums]);
-    //?????????????
-    albumsStream.
-    var outStream = albumsStream.map((albumsList){
-        if(_isError == false)
-          albumsCache.setData(albumsList);
-        return AlbumsResponse(albums: albumsList, lastUpdate: _lastUpdate);
-      });
-    yield outStream;
+    var albumsResponse = AlbumsResponse(albums: albums, lastUpdate: _lastUpdate);
+    yield albumsResponse;
   }
 }
