@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
-import 'package:my_albums6/model/albums.dart';
-import 'package:my_albums6/view/album.dart';
-import 'package:my_albums6/view_model/albums_view_model.dart';
-import 'package:pull_to_refresh/pull_to_refresh.dart';
 import 'package:rxdart/rxdart.dart';
+import 'package:intl/intl.dart';
+
+import '../model/albums.dart';
+import './album.dart';
+import '../view_model/albums_view_model.dart';
+
 
 class HomeScreen extends StatefulWidget {
   @override
@@ -16,10 +17,14 @@ class _HomeScreenState extends State<HomeScreen> {
     Input(BehaviorSubject<bool>()),
   );
   void getAlbums() {
-    print("AA");
     setState(() {
       albumsVM.input.loadData.add(true);
     });
+  }
+  @override
+  void initState() {
+    super.initState();
+    getAlbums();
   }
 
   @override
@@ -33,18 +38,25 @@ class _HomeScreenState extends State<HomeScreen> {
           child: StreamBuilder(
               stream: albumsVM.output.stream,
               builder: (ctx, snapshot) {
+
+                if(snapshot.connectionState == ConnectionState.waiting)
+                  return Center(child: CircularProgressIndicator(),);
+                else{
                 if(snapshot.data != null){
                   var data = snapshot.data as AlbumsResponse;
                   var albums = data.albums;
                   var lastUpdate = data.lastUpdate;
-                  var difference = lastUpdate.difference(DateTime.now());
-                return snapshot.connectionState == ConnectionState.waiting
-                ?  Center(child: CircularProgressIndicator(),)
-                :  Column(
+                  //var difference = lastUpdate.difference(DateTime.now());
+                return Column(
                   children: [
+                    if(lastUpdate != null)
                     Text(
                       "Last update at: ${(DateFormat.Hms().format(lastUpdate))}"
                     ),
+                    // if(lastUpdate == null)
+                    // Text(
+                    //   "Last update at: ${(DateFormat.Hms().format(lastUpdate))}"
+                    // ),
                     Expanded(
                       //height: 640,
                       child: ListView.builder(
@@ -63,8 +75,10 @@ class _HomeScreenState extends State<HomeScreen> {
                 );
                 }
                 else
-                  return (Text("Double Tap for Updates"));
-              }),
+                  return (Text("${(snapshot)}"));
+              }
+              }
+              ),
           //insert a better function:
           onDoubleTap: getAlbums,
 

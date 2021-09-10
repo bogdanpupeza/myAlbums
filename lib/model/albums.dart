@@ -19,7 +19,7 @@ class Album{
 
 class AlbumsResponse{
   final List<Album> albums;
-  final DateTime lastUpdate;
+  DateTime? lastUpdate;
   AlbumsResponse({
     required this.albums,
     required this.lastUpdate,

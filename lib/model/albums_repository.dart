@@ -1,5 +1,3 @@
-import 'dart:io';
-import 'package:shared_preferences/shared_preferences.dart';
 import '../model/albums_cache.dart';
 import '../model/albums_service.dart';
 import '../model/albums.dart';
@@ -9,27 +7,29 @@ class AlbumsRepository{
 
   final AlbumsService albumsService;
   final AlbumsCache albumsCache;
+
   AlbumsRepository(
     this.albumsService,
     this.albumsCache,
   );
-  
-  Stream<AlbumsResponse> getAlbums() async* {
-    var _isError = false;
-    var _lastUpdate;
-    var albums = await albumsService.getAlbums().
-    onError(
-        (error, stackTrace)async {
-          print(error);
-          _isError = true;
-          return await albumsCache.getAlbums();
-        }
-      ).whenComplete((){
-        if(_isError == false) {
+
+  DateTime? _lastUpdate;
+
+  Stream<AlbumsResponse> getAlbums(){
+    Stream<List<Album>> albumsStream = Stream.fromFuture(
+      albumsService.getAlbums().then(
+        (albums){
           _lastUpdate = DateTime.now();
+          albumsCache.setData(albums);
+          return albums;
         }
+      ).onError(
+        (error, stackTrace){
+          return albumsCache.getAlbums();
+        })
+    );
+    return albumsStream.map((albumsList){
+        return AlbumsResponse(albums: albumsList, lastUpdate: _lastUpdate);
       });
-    var albumsResponse = AlbumsResponse(albums: albums, lastUpdate: _lastUpdate);
-    yield albumsResponse;
   }
 }
