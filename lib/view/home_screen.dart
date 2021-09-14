@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
-import 'package:my_albums6/model/albums.dart';
-import 'package:my_albums6/view/album.dart';
-import 'package:my_albums6/view_model/albums_view_model.dart';
-import 'package:pull_to_refresh/pull_to_refresh.dart';
 import 'package:rxdart/rxdart.dart';
+import 'package:intl/intl.dart';
+
+import '../model/albums.dart';
+import './album.dart';
+import '../view_model/albums_view_model.dart';
 
 class HomeScreen extends StatefulWidget {
   @override
@@ -12,13 +12,31 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
+  List<AlbumFavoriteStatus> albumsFavoriteStatus = [];
   AlbumsVM albumsVM = AlbumsVM(
-    Input(BehaviorSubject<bool>()),
+    Input(
+      BehaviorSubject<bool>(),
+      BehaviorSubject<int>(),
+    ),
   );
   void getAlbums() {
-    print("AA");
     setState(() {
       albumsVM.input.loadData.add(true);
+    });
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    getAlbums();
+  }
+
+  void toggleFavorite(int id, bool isFavorite){
+    setState(() {
+      print(isFavorite);
+      //albumsVM.input.favoriteToggle.add(id);
+      albumsVM.toggle(id);
+      //print("id: $id");
     });
   }
 
@@ -33,41 +51,41 @@ class _HomeScreenState extends State<HomeScreen> {
           child: StreamBuilder(
               stream: albumsVM.output.stream,
               builder: (ctx, snapshot) {
-                if(snapshot.data != null){
-                  var data = snapshot.data as AlbumsResponse;
-                  var albums = data.albums;
-                  var lastUpdate = data.lastUpdate;
-                  var difference = lastUpdate.difference(DateTime.now());
-                return snapshot.connectionState == ConnectionState.waiting
-                ?  Center(child: CircularProgressIndicator(),)
-                :  Column(
-                  children: [
-                    Text(
-                      "Last update at: ${(DateFormat.Hms().format(lastUpdate))}"
-                    ),
-                    Expanded(
-                      //height: 640,
-                      child: ListView.builder(
-                        itemCount: albums.length,
-                        itemBuilder: (ctx, index) {
-                          return AlbumWidget(
-                            name: albums[index].name,
-                            id: albums[index].id,
-                            userId: albums[index].userId,
-                          );
-                        },
-    
-                      ),
-                    ),
-                  ],
-                );
+                if (snapshot.connectionState == ConnectionState.waiting)
+                  return Center(
+                    child: CircularProgressIndicator(),
+                  );
+                else {
+                  if (snapshot.data != null) {
+                    var data = snapshot.data as AlbumsResponse;
+                    var albums = data.albums;
+                    var lastUpdate = data.lastUpdate;
+                    return Column(
+                      children: [
+                        if (lastUpdate != null)
+                          Text(
+                              "Last update at: ${(DateFormat.Hms().format(lastUpdate))}"),
+                        Expanded(
+                          child: ListView.builder(
+                            itemCount: albums.length,
+                            itemBuilder: (ctx, index) {
+                              return AlbumWidget(
+                                toggleFavorite: toggleFavorite,
+                                isFavorite: albums[index].favorite,
+                                name: albums[index].name,
+                                id: albums[index].id,
+                                userId: albums[index].userId,
+                              );
+                            },
+                          ),
+                        ),
+                      ],
+                    );
+                  } else
+                    return (Text("There are no albums"));
                 }
-                else
-                  return (Text("Double Tap for Updates"));
               }),
-          //insert a better function:
           onDoubleTap: getAlbums,
-
         ),
       ),
     );

@@ -1,34 +1,55 @@
-import 'dart:async';
-import 'package:my_albums6/model/albums_cache.dart';
+import 'package:rxdart/rxdart.dart';
 
+import '../model/albums_cache.dart';
 import '../model/albums.dart';
 import '../model/albums_repository.dart';
 import '../model/albums_service.dart';
-import 'package:rxdart/rxdart.dart';
+
 
 class AlbumsVM{
   final albumsRepository = AlbumsRepository(AlbumsService(),AlbumsCache());
   final Input input;
   late Output output;
+
   AlbumsVM(this.input){
-    Stream<AlbumsResponse> stream = input.loadData.flatMap((event){
+
+    Stream<List<AlbumFavoriteStatus>>
+    favoriteStream = input.favoriteToggle.flatMap(
+      (chosenAlbum){
+        return albumsRepository.toggleFavorite(chosenAlbum);
+      }
+    );
+
+    Stream<AlbumsResponse> stream = input.loadData.flatMap(
+      (event){
         return albumsRepository.getAlbums();
       }
     );
-    output = Output(stream);
+    output = Output(
+      stream,
+      favoriteStream,
+    );
   }
- 
+
+  void toggle(int id){
+    albumsRepository.toggleFavorite(id);
+  }
 }
 
 class Input{
   Subject<bool> loadData;
-  Input(this.loadData);
+  Subject<int> favoriteToggle;
+  Input(
+    this.loadData,
+    this.favoriteToggle
+  );
 }
 
 class Output{
-  final Stream<AlbumsResponse> _stream;
-  Output(this._stream);
-  Stream<AlbumsResponse> get stream{
-    return _stream;
-  }
+  final Stream<AlbumsResponse> stream;
+  final Stream<List<AlbumFavoriteStatus>> favoritesStream;
+  Output(
+    this.stream,
+    this.favoritesStream,
+  );
 }

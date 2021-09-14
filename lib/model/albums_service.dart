@@ -4,20 +4,30 @@ import 'dart:io';
 import 'package:http/http.dart' as http;
 import '../model/albums.dart';
 
-class AlbumsService{
+class AlbumsService {
   String _url = "https://jsonplaceholder.typicode.com/albums";
-  Future<List<Album>> getAlbums () async {
-    List<Album> albumList = [];
+  
+  Stream<List<Album>> getAlbums () {
+    
     List<dynamic> responseJson;
-    try {
-      final response = await http.get(Uri.parse(_url));
-      responseJson = jsonDecode(response.body);
-      albumList = responseJson.map((element) => Album.fromJson(element)).toList();
-    } on SocketException{
-      throw SocketException("No interner connection");
-    } catch (error) {
-      throw error;
-    }
-    return albumList;
+    List<Album> albums = [];
+    var response;
+    return Stream.fromFuture(
+      http.get(Uri.parse(_url)).then(
+        (value){
+          response = value;
+          responseJson = jsonDecode(response.body);
+          albums = responseJson.map((element) {
+            return Album.fromJson(element);
+          }).toList();
+          return albums;
+        }
+      ).onError((error, stackTrace){
+        throw SocketException("No internet connection");
+        //return albums;
+      })
+    );
   }
+
+
 }
