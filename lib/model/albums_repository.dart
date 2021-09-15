@@ -1,7 +1,5 @@
 import 'dart:io';
-
 import 'package:rxdart/rxdart.dart';
-
 import '../model/albums_cache.dart';
 import '../model/albums_service.dart';
 import '../model/albums.dart';
@@ -48,12 +46,12 @@ class AlbumsRepository{
     Stream<List<Album>> albumsStream = 
     albumsService.getAlbums().handleError(
       (error, stackTrace){
-        //if(error is SocketException){
+        if(error is SocketException){
           _lastUpdate = oldDate;
           isError = true;
           return albumsCache.getAlbums();
-       // }
-        //throw error;
+        }
+        throw error;
       }
     );
 
