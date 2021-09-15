@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 class AlbumWidget extends StatelessWidget {
-  final Function(void) toggleFavorite;
+  final Function toggleFavorite;
   final bool? isFavorite;
   final String? name;
   final int? id;

@@ -1,5 +1,4 @@
 import 'package:rxdart/rxdart.dart';
-
 import '../model/albums_cache.dart';
 import '../model/albums.dart';
 import '../model/albums_repository.dart';
@@ -23,20 +22,24 @@ class AlbumsVM{
     });
 
     Stream<AlbumsResponse> combinedStream =
-    Rx.combineLatest2(albumsData, favoritesStream, 
+    Rx.combineLatest2(albumsData, favoritesStream.startWith([]), 
       (AlbumsResponse albumsResponse, List<int> favorites){
-        albumsResponse.albums.forEach((album) {
-          if(favorites.any((item) => item == album.id)){
-              album.favorite = true;
-            } else {
-              album.favorite = false;
-            }
-        });
-        return albumsResponse;
+        return AlbumsResponse(
+          albums: albumsResponse.albums.map((album){
+            Album albumFav = Album(
+              id: album.id,
+              name: album.name,
+              userId: album.userId,
+              favorite: favorites.any((element) => element == album.id),
+            );
+            return albumFav;
+          }).toList(), 
+          lastUpdate: albumsResponse.lastUpdate
+         );
       }
     );
-    ///
-    output = Output(albumsData);
+    
+    output = Output(combinedStream);
   }
 }
 

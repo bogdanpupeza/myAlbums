@@ -40,20 +40,17 @@ class AlbumsRepository{
     _lastUpdate = DateTime.now();
     bool isError = false;
     
-    Stream<DateTime> dateStream = albumsCache.getLastDate().map((date){
-      oldDate = date;
-      return date;
-    });
+    Stream<DateTime?> dateStream = albumsCache.getLastDate();
 
     Stream<List<Album>> albumsStream = 
     albumsService.getAlbums().handleError(
       (error, stackTrace){
-        //if(error is SocketException){
+        if(error is SocketException){
           _lastUpdate = oldDate;
           isError = true;
           return albumsCache.getAlbums();
-       // }
-        //throw error;
+        }
+        throw error;
       }
     );
 
@@ -68,8 +65,8 @@ class AlbumsRepository{
       return Rx.combineLatest2(
         albumsResponse, 
         dateStream, 
-        (AlbumsResponse albumsResponse, DateTime date){
-          if(isError)
+        (AlbumsResponse albumsResponse, DateTime? date){
+          if(date != null)
             _lastUpdate = date;
           return AlbumsResponse(albums: albumsResponse.albums, lastUpdate: _lastUpdate);
         }
