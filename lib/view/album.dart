@@ -57,8 +57,10 @@ class AlbumWidget extends StatelessWidget {
           onPressed: () {},
         ),
         IconButton(
-          onPressed: () => toggleFavorite(id, isFavorite),
-          icon: isFavorite == true
+          onPressed: () => toggleFavorite(id),
+          icon: isFavorite == null 
+              ? Icon(Icons.favorite_border)
+              : isFavorite == true
               ? Icon(Icons.favorite)
               : Icon(Icons.favorite_border),
         ),

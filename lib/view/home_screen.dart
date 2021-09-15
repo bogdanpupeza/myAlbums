@@ -12,7 +12,6 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  List<AlbumFavoriteStatus> albumsFavoriteStatus = [];
   AlbumsVM albumsVM = AlbumsVM(
     Input(
       BehaviorSubject<bool>(),
@@ -25,18 +24,10 @@ class _HomeScreenState extends State<HomeScreen> {
     });
   }
 
-  @override
-  void initState() {
-    super.initState();
-    getAlbums();
-  }
 
-  void toggleFavorite(int id, bool isFavorite){
+  void toggleFavorite(int albumId){
     setState(() {
-      print(isFavorite);
-      //albumsVM.input.favoriteToggle.add(id);
-      albumsVM.toggle(id);
-      //print("id: $id");
+      albumsVM.input.toggleFavorite.add(albumId);
     });
   }
 
@@ -48,8 +39,8 @@ class _HomeScreenState extends State<HomeScreen> {
       ),
       body: Center(
         child: GestureDetector(
-          child: StreamBuilder(
-              stream: albumsVM.output.stream,
+          child: StreamBuilder<AlbumsResponse>(
+              stream: albumsVM.output.albumsDataStream,
               builder: (ctx, snapshot) {
                 if (snapshot.connectionState == ConnectionState.waiting)
                   return Center(

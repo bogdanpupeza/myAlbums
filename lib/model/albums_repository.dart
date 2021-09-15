@@ -1,5 +1,7 @@
 import 'dart:io';
 
+import 'package:rxdart/rxdart.dart';
+
 import '../model/albums_cache.dart';
 import '../model/albums_service.dart';
 import '../model/albums.dart';
@@ -16,70 +18,62 @@ class AlbumsRepository{
   );
 
   DateTime? _lastUpdate;
-  List<AlbumFavoriteStatus> albumsFavorites = [];
 
-  Stream<List<AlbumFavoriteStatus>> toggleFavorite(int id){
+  Stream<List<int>> toggleAlbum(int id){
+    Stream<List<int>> favoritesStream = albumsCache.getFavorites();
+    Stream<List<int>> actualFavorites = favoritesStream.map((favorites){
+      if(favorites.any((element) => element == id)) {
+        favorites.remove(id);
+      } else {
+        favorites.add(id);
+      }
+      albumsCache.setFavorites(favorites);
+      return favorites;
+    });
 
-    bool? favStat = albumsFavorites.firstWhere((element) => element.id==id).favoriteStatus;
-    if(favStat == null)
-      favStat = false;
-    albumsFavorites.firstWhere((element) => element.id == id).favoriteStatus = !favStat;
-    albumsCache.setFavorites(albumsFavorites);
-    return Stream.fromIterable([albumsFavorites]);
+    return actualFavorites;
   }
+
   
   Stream<AlbumsResponse> getAlbums(){
-    DateTime? oldDate = _lastUpdate;
+    DateTime? oldDate;
     _lastUpdate = DateTime.now();
     bool isError = false;
+    
+    Stream<DateTime> dateStream = albumsCache.getLastDate().map((date){
+      oldDate = date;
+      return date;
+    });
+
     Stream<List<Album>> albumsStream = 
     albumsService.getAlbums().handleError(
       (error, stackTrace){
-        _lastUpdate = oldDate;
-        isError = true;
-        print("Albums from cache");
-        return albumsCache.getAlbums();
+        //if(error is SocketException){
+          _lastUpdate = oldDate;
+          isError = true;
+          return albumsCache.getAlbums();
+       // }
+        //throw error;
       }
-    )
-    .map((albums){
-      if (albumsFavorites.isEmpty) {
-        albums.forEach((album) {
-          albumsFavorites.add(
-            new AlbumFavoriteStatus(
-              id: album.id, 
-              favoriteStatus: album.favorite,
-            ));
-        });
-        print("EmptyFavorites");
-        albumsCache.setFavorites(albumsFavorites);
-      }
+    );
 
-      albumsCache.getFavorites().map((favorites){
-        albumsFavorites.forEach((fav){
-          fav = favorites.firstWhere((album){
-            return album.id == fav.id;
-          });
-        });
-        albums.forEach((album) {
-          album.favorite = favorites.firstWhere(
-            (albumFav){
-              return (album.id == albumFav.id);
-            }
-          ).favoriteStatus;
-       });
-      }
+      Stream<AlbumsResponse> albumsResponse = albumsStream.map((albumsList){
+        if(!isError){
+          albumsCache.setAlbums(albumsList);
+          albumsCache.setDate(DateTime.now());
+        }
+        return AlbumsResponse(albums: albumsList, lastUpdate: _lastUpdate);
+      });
+
+      return Rx.combineLatest2(
+        albumsResponse, 
+        dateStream, 
+        (AlbumsResponse albumsResponse, DateTime date){
+          if(isError)
+            _lastUpdate = date;
+          return AlbumsResponse(albums: albumsResponse.albums, lastUpdate: _lastUpdate);
+        }
       );
-      print(albumsFavorites.first.id);
-      print(albums.first.favorite);
-      return albums;
-    });
-
-    return albumsStream.map((albumsList){
-      if(!isError){
-        albumsCache.setData(albumsList);
-      }
-      return AlbumsResponse(albums: albumsList, lastUpdate: _lastUpdate);
-    });
   }
   
   

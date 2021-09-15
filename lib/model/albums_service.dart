@@ -5,7 +5,7 @@ import 'package:http/http.dart' as http;
 import '../model/albums.dart';
 
 class AlbumsService {
-  String _url = "https://jsonplaceholder.typicode.com/albums";
+  final String _url = "https://jsonplaceholder.typicode.com/albums";
   
   Stream<List<Album>> getAlbums () {
     
@@ -23,8 +23,9 @@ class AlbumsService {
           return albums;
         }
       ).onError((error, stackTrace){
-        throw SocketException("No internet connection");
-        //return albums;
+        if(error is SocketException)
+          throw SocketException("No internet connection");
+        throw stackTrace;
       })
     );
   }

@@ -12,44 +12,46 @@ class AlbumsVM{
   late Output output;
 
   AlbumsVM(this.input){
-
-    Stream<List<AlbumFavoriteStatus>>
-    favoriteStream = input.favoriteToggle.flatMap(
-      (chosenAlbum){
-        return albumsRepository.toggleFavorite(chosenAlbum);
-      }
-    );
-
-    Stream<AlbumsResponse> stream = input.loadData.flatMap(
+    Stream<AlbumsResponse> albumsData = input.loadData.flatMap(
       (event){
         return albumsRepository.getAlbums();
       }
     );
-    output = Output(
-      stream,
-      favoriteStream,
-    );
-  }
+    
+    Stream<List<int>> favoritesStream = input.toggleFavorite.flatMap((albumId){
+      return albumsRepository.toggleAlbum(albumId);
+    });
 
-  void toggle(int id){
-    albumsRepository.toggleFavorite(id);
+    Stream<AlbumsResponse> combinedStream =
+    Rx.combineLatest2(albumsData, favoritesStream, 
+      (AlbumsResponse albumsResponse, List<int> favorites){
+        albumsResponse.albums.forEach((album) {
+          if(favorites.any((item) => item == album.id)){
+              album.favorite = true;
+            } else {
+              album.favorite = false;
+            }
+        });
+        return albumsResponse;
+      }
+    );
+    ///
+    output = Output(albumsData);
   }
 }
 
 class Input{
   Subject<bool> loadData;
-  Subject<int> favoriteToggle;
+  Subject<int> toggleFavorite;
   Input(
     this.loadData,
-    this.favoriteToggle
+    this.toggleFavorite,
   );
 }
 
 class Output{
-  final Stream<AlbumsResponse> stream;
-  final Stream<List<AlbumFavoriteStatus>> favoritesStream;
+  final Stream<AlbumsResponse> albumsDataStream;
   Output(
-    this.stream,
-    this.favoritesStream,
+    this.albumsDataStream,
   );
 }
