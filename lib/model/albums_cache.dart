@@ -20,7 +20,9 @@ class AlbumsCache{
           albumsList = responseJson.map((element) => Album.fromJson(element)).toList();
           return albumsList;
         }
-      )
+      ).onError((error, stackTrace){
+        return [];
+      })
     );
   }
   
@@ -50,8 +52,8 @@ class AlbumsCache{
     );
   }
 
-  Stream<DateTime> getLastDate (){
-    DateTime dateTime;
+  Stream<DateTime?> getLastDate (){
+    DateTime? dateTime;
     List<dynamic> responseJson;
     var response;
     return Stream.fromFuture(
@@ -64,7 +66,9 @@ class AlbumsCache{
           }).first;
           return dateTime;
         }
-      )
+      ).onError((error, stackTrace){
+        return null;
+      })
     );
   }
 
@@ -77,10 +81,14 @@ class AlbumsCache{
         (value){
           response = value.getString(_favoritesKey) as String;
           responseJson = jsonDecode( response);
-          favorites = responseJson.map((element) => int.parse(element)).toList();
+          responseJson.map((element){
+            favorites.add(element["id"]);
+          }).toList();
           return favorites;
         }
-      )
+      ).onError((error, stackTrace){
+        return [];
+      })
     );
   }
 
@@ -95,7 +103,7 @@ class AlbumsCache{
             };
           }).toList()
         );
-        value.setString(_albumsCacheListKey, jsonData);
+        value.setString(_favoritesKey, jsonData);
         return value;
       }
     );
