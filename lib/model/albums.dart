@@ -1,4 +1,4 @@
-class Album{
+class Album {
   final int? userId;
   final String? name;
   final int? id;
@@ -9,7 +9,7 @@ class Album{
     required this.id,
     this.favorite = false,
   });
-  
+
   factory Album.fromJson(Map<String, dynamic> json) {
     return Album(
       id: json['id'] as int?,
@@ -18,16 +18,25 @@ class Album{
       favorite: json['favoriteStatus'] as bool?,
     );
   }
+
+  Map<String, dynamic> toJson() {
+    return {
+      "id": id,
+      "title": name,
+      "userId": userId,
+      "favoriteStatus": favorite,
+    };
+  }
 }
 
-class AlbumsResponse{
+class AlbumsResponse {
   final List<Album> albums;
   DateTime? lastUpdate;
   AlbumsResponse({
     required this.albums,
     required this.lastUpdate,
   });
-  factory AlbumsResponse.fromAlbums(albums, date){
+  factory AlbumsResponse.fromAlbums(albums, date) {
     return AlbumsResponse(
       albums: albums,
       lastUpdate: date,
