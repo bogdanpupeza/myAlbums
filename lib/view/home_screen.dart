@@ -25,7 +25,7 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
 
-  void _toggleFavorite(int albumId){
+  void toggleFavorite(int albumId){
     setState(() {
       albumsVM.input.toggleFavorite.add(albumId);
     });
@@ -61,7 +61,7 @@ class _HomeScreenState extends State<HomeScreen> {
                             itemCount: albums.length,
                             itemBuilder: (ctx, index) {
                               return AlbumWidget(
-                                toggleFavorite: _toggleFavorite,
+                                toggleFavorite: toggleFavorite,
                                 isFavorite: albums[index].favorite,
                                 name: albums[index].name,
                                 id: albums[index].id,
