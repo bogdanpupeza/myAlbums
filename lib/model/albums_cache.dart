@@ -10,57 +10,54 @@ class AlbumsCache{
 
   Stream<List<Album>> getAlbums (){
     List<Album> albumsList = [];
-    List<String> response;
+    List<dynamic> responseJson;
+    var response;
     return Stream.fromFuture(
       SharedPreferences.getInstance().then(
-        (value){
-          response = value.getStringList(_albumsCacheListKey) as List<String>;
-          albumsList = response.map((jsonAlbum){
-              return Album.fromJson(jsonAlbum);
-          }).toList();
+        (pref){
+          response = pref.getString(_albumsCacheListKey) as String;
+          responseJson = jsonDecode( response);
+          albumsList = responseJson.map((element) => Album.fromJson(element)).toList();
           return albumsList;
         }
-      )
+      ).onError((error, stackTrace){
+        return [];
+      })
     );
   }
   
   void setAlbums(List<Album> albums){
     SharedPreferences.getInstance().then(
-      (value){
-        List<String> jsonData =
+      (pref){
+        String jsonData = jsonEncode(
           albums.map((album){
             return album.toJson();
-          }).toList();
-        value.setStringList(_albumsCacheListKey, jsonData);
-        return value;
+          }).toList()
+        );
+        pref.setString(_albumsCacheListKey, jsonData);
+        return pref;
       }
     );
   }
 
   void setDate(DateTime dateTime){
     SharedPreferences.getInstance().then(
-      (value){
-        String jsonData = jsonEncode(
-          dateTime.toIso8601String()
-        );
-        value.setString(_dateKey, jsonData);
-        return value;
+      (pref){
+        String dateString = dateTime.toIso8601String();
+        pref.setString(_dateKey, dateString);
+        return pref;
       }
     );
   }
 
   Stream<DateTime> getLastDate (){
     DateTime dateTime;
-    List<dynamic> responseJson;
-    var response;
+    String dateString;
     return Stream.fromFuture(
       SharedPreferences.getInstance().then(
-        (value){
-          response = value.getString(_dateKey) as String;
-          responseJson = jsonDecode(response);
-          dateTime = responseJson.map((e){
-            return DateTime.parse(e);
-          }).first;
+        (pref){
+          dateString = pref.getString(_dateKey) as String;
+          dateTime = DateTime.parse(dateString);
           return dateTime;
         }
       )
@@ -72,10 +69,10 @@ class AlbumsCache{
     List<String> response;
     return Stream.fromFuture(
       SharedPreferences.getInstance().then(
-        (value){
-          response = value.getStringList(_favoritesKey) as List<String>;
-          favorites = response.map((jsonElement){
-            return int.parse(json.decode(jsonElement));
+        (pref){
+          response = pref.getStringList(_favoritesKey) as List<String>;
+          favorites = response.map((idString){
+            return int.parse(idString);
           }).toList();
           return favorites;
         }
@@ -84,17 +81,14 @@ class AlbumsCache{
   }
 
   void setFavorites(List<int> favorites){
-
     SharedPreferences.getInstance().then(
-      (value){
-        List<String> jsonData =
+      (pref){
+        List<String> ids =
           favorites.map((albumId){
-            return json.encode({
-              "id": albumId,
-            });
+            return albumId.toString();
           }).toList();
-        value.setStringList(_albumsCacheListKey, jsonData);
-        return value;
+        pref.setStringList(_albumsCacheListKey, ids);
+        return pref;
       }
     );
   }
