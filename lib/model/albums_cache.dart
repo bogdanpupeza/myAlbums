@@ -11,13 +11,14 @@ class AlbumsCache{
   Stream<List<Album>> getAlbums (){
     List<Album> albumsList = [];
     List<dynamic> responseJson;
-    var response;
+    List<String> response;
     return Stream.fromFuture(
       SharedPreferences.getInstance().then(
         (value){
-          response = value.getString(_albumsCacheListKey) as String;
-          responseJson = jsonDecode( response);
-          albumsList = responseJson.map((element) => Album.fromJson(element)).toList();
+          response = value.getStringList(_albumsCacheListKey) as List<String>;
+          albumsList = response.map((jsonAlbum){
+              return Album.fromJson(jsonAlbum);
+          }).toList();
           return albumsList;
         }
       )
@@ -27,12 +28,11 @@ class AlbumsCache{
   void setAlbums(List<Album> albums){
     SharedPreferences.getInstance().then(
       (value){
-        String jsonData = jsonEncode(
+        List<String> jsonData =
           albums.map((album){
             return album.toJson();
-          }).toList()
-        );
-        value.setString(_albumsCacheListKey, jsonData);
+          }).toList();
+        value.setStringList(_albumsCacheListKey, jsonData);
         return value;
       }
     );
