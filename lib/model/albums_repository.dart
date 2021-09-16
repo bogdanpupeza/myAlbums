@@ -18,6 +18,7 @@ class AlbumsRepository{
   );
 
   DateTime? _lastUpdate;
+  bool? liveUpdate;
 
   Stream<List<int>> toggleAlbum(int id){
     Stream<List<int>> favoritesStream = albumsCache.getFavorites();
@@ -36,6 +37,7 @@ class AlbumsRepository{
 
   
   Stream<AlbumsResponse> getAlbums(){
+    liveUpdate = true;
     DateTime? oldDate;
     _lastUpdate = DateTime.now();
     bool isError = false;
@@ -45,7 +47,9 @@ class AlbumsRepository{
     Stream<List<Album>> albumsStream = 
     albumsService.getAlbums().handleError(
       (error, stackTrace){
+        //i don't think this works as i think it should do
         if(error is SocketException){
+          liveUpdate = false;
           _lastUpdate = oldDate;
           isError = true;
           return albumsCache.getAlbums();
@@ -59,7 +63,7 @@ class AlbumsRepository{
           albumsCache.setAlbums(albumsList);
           albumsCache.setDate(DateTime.now());
         }
-        return AlbumsResponse(albums: albumsList, lastUpdate: _lastUpdate);
+        return AlbumsResponse(albums: albumsList, lastUpdate: _lastUpdate, liveUpdate: liveUpdate);
       });
 
       return Rx.combineLatest2(
@@ -68,7 +72,7 @@ class AlbumsRepository{
         (AlbumsResponse albumsResponse, DateTime? date){
           if(date != null)
             _lastUpdate = date;
-          return AlbumsResponse(albums: albumsResponse.albums, lastUpdate: _lastUpdate);
+          return AlbumsResponse(albums: albumsResponse.albums, lastUpdate: _lastUpdate, liveUpdate: liveUpdate);
         }
       );
   }
