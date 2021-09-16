@@ -10,7 +10,6 @@ class AlbumsCache{
 
   Stream<List<Album>> getAlbums (){
     List<Album> albumsList = [];
-    List<dynamic> responseJson;
     List<String> response;
     return Stream.fromFuture(
       SharedPreferences.getInstance().then(
@@ -70,14 +69,14 @@ class AlbumsCache{
 
   Stream<List<int>> getFavorites(){
     List<int> favorites = [];
-    List<dynamic> responseJson;
-    var response;
+    List<String> response;
     return Stream.fromFuture(
       SharedPreferences.getInstance().then(
         (value){
-          response = value.getString(_favoritesKey) as String;
-          responseJson = jsonDecode( response);
-          favorites = responseJson.map((element) => int.parse(element)).toList();
+          response = value.getStringList(_favoritesKey) as List<String>;
+          favorites = response.map((jsonElement){
+            return int.parse(json.decode(jsonElement));
+          }).toList();
           return favorites;
         }
       )
@@ -88,14 +87,13 @@ class AlbumsCache{
 
     SharedPreferences.getInstance().then(
       (value){
-        String jsonData = jsonEncode(
+        List<String> jsonData =
           favorites.map((albumId){
-            return {
+            return json.encode({
               "id": albumId,
-            };
-          }).toList()
-        );
-        value.setString(_albumsCacheListKey, jsonData);
+            });
+          }).toList();
+        value.setStringList(_albumsCacheListKey, jsonData);
         return value;
       }
     );
