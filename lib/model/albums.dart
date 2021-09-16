@@ -33,14 +33,17 @@ class Album{
 class AlbumsResponse{
   final List<Album> albums;
   DateTime? lastUpdate;
+  bool? liveUpdate;
   AlbumsResponse({
     required this.albums,
     required this.lastUpdate,
+    required this.liveUpdate,
   });
-  factory AlbumsResponse.fromAlbums(albums, date){
+  factory AlbumsResponse.fromAlbums(albums, date, liveUpdate){
     return AlbumsResponse(
       albums: albums,
       lastUpdate: date,
+      liveUpdate: liveUpdate,
     );
   }
 }

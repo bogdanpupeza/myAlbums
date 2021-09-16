@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
+import './date.dart';
 import 'package:rxdart/rxdart.dart';
-import 'package:intl/intl.dart';
 
 import '../model/albums.dart';
 import './album.dart';
@@ -48,14 +48,16 @@ class _HomeScreenState extends State<HomeScreen> {
                   );
                 else {
                   if (snapshot.data != null) {
-                    var data = snapshot.data as AlbumsResponse;
-                    var albums = data.albums;
-                    var lastUpdate = data.lastUpdate;
+                    AlbumsResponse data = snapshot.data as AlbumsResponse;
+                    List<Album> albums = data.albums;
+                    DateTime? lastUpdate = data.lastUpdate;
+                    bool? liveUpdate = data.liveUpdate;
                     return Column(
                       children: [
-                        if (lastUpdate != null)
-                          Text(
-                              "Last update at: ${(DateFormat.Hms().format(lastUpdate))}"),
+                        DateWidget(
+                          date: lastUpdate,
+                          liveUpdate: liveUpdate,
+                        ),
                         Expanded(
                           child: ListView.builder(
                             itemCount: albums.length,

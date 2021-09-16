@@ -34,7 +34,8 @@ class AlbumsVM{
             );
             return albumFav;
           }).toList(), 
-          lastUpdate: albumsResponse.lastUpdate
+          lastUpdate: albumsResponse.lastUpdate,
+          liveUpdate: albumsResponse.liveUpdate,
          );
       }
     );
