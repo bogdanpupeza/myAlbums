@@ -1,5 +1,3 @@
-import 'dart:convert';
-
 class Album{
   final int? userId;
   final String? name;
@@ -12,23 +10,23 @@ class Album{
     this.favorite = false,
   });
   
-  factory Album.fromJson(String jsonString) {
-    dynamic jsonAlbum = json.decode(jsonString);
+  factory Album.fromJson(Map<String, dynamic> json) {
     return Album(
-      id: jsonAlbum['id'] as int?,
-      name: jsonAlbum['title'] as String?,
-      userId: jsonAlbum['userId'] as int?,
-      favorite: jsonAlbum['favoriteStatus'] as bool?,
+      id: json['id'] as int?,
+      name: json['title'] as String?,
+      userId: json['userId'] as int?,
+      favorite: json['favoriteStatus'] as bool?,
     );
   }
 
-  String toJson(){
-    return json.encode({
+  Map<String, dynamic >toJson(){
+    return {
       "id": id,
       "title": name,
       "userId": userId,
       "favoriteStatus": favorite,
-    });
+      
+    };
   }
 }
 
