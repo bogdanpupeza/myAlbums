@@ -18,17 +18,14 @@ class _HomeScreenState extends State<HomeScreen> {
       BehaviorSubject<int>(),
     ),
   );
+
   void getAlbums() {
-    setState(() {
-      albumsVM.input.loadData.add(true);
-    });
+   albumsVM.input.loadData.add(true);
   }
 
 
   void toggleFavorite(int albumId){
-    setState(() {
-      albumsVM.input.toggleFavorite.add(albumId);
-    });
+    albumsVM.input.toggleFavorite.add(albumId);
   }
 
   @override
