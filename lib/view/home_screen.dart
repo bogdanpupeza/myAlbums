@@ -11,6 +11,28 @@ class HomeScreen extends StatefulWidget {
   _HomeScreenState createState() => _HomeScreenState();
 }
 
+
+
+extension on Duration{
+  String get showLastUpdate{
+    String duration = "";
+    if(this.inDays > 0){
+      duration += "${(this.inDays.toString())} days ";
+    } else {
+      if(this.inMinutes > 0){
+        int minutes = this.inMinutes % 60;
+        duration += "${(minutes.toString())} minutes ";
+      }
+      if(this.inSeconds >= 0){
+        int seconds = this.inSeconds % 60;
+        duration += "${(seconds.toString())} seconds";
+      }
+    }
+    return duration;
+  }
+}
+
+
 class _HomeScreenState extends State<HomeScreen> {
   AlbumsVM albumsVM = AlbumsVM(
     Input(
@@ -27,6 +49,8 @@ class _HomeScreenState extends State<HomeScreen> {
   void toggleFavorite(int albumId){
     albumsVM.input.toggleFavorite.add(albumId);
   }
+
+  
 
   @override
   Widget build(BuildContext context) {
@@ -48,11 +72,13 @@ class _HomeScreenState extends State<HomeScreen> {
                     var data = snapshot.data as AlbumsResponse;
                     var albums = data.albums;
                     var lastUpdate = data.lastUpdate;
+                    Duration duration = Duration();
+                    if(lastUpdate != null)
+                      duration = DateTime.now().difference(lastUpdate);
                     return Column(
                       children: [
-                        if (lastUpdate != null)
-                          Text(
-                              "Last update at: ${(DateFormat.Hms().format(lastUpdate))}"),
+                        if (duration != null)
+                          Text("Results updated ${(duration.showLastUpdate)} ago"),
                         Expanded(
                           child: ListView.builder(
                             itemCount: albums.length,
