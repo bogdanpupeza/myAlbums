@@ -31,12 +31,7 @@ class AlbumsCache{
       (value){
         String jsonData = jsonEncode(
           albums.map((album){
-            return {
-              "id": album.id,
-              "title": album.name,
-              "userId": album.userId,
-              "favoriteStatus": album.favorite,
-            };
+            return album.toJson();
           }).toList()
         );
         value.setString(_albumsCacheListKey, jsonData);
@@ -59,16 +54,14 @@ class AlbumsCache{
 
   Stream<DateTime?> getLastDate (){
     DateTime? dateTime;
-    List<dynamic> responseJson;
+    String responseJson;
     var response;
     return Stream.fromFuture(
       SharedPreferences.getInstance().then(
         (value){
           response = value.getString(_dateKey) as String;
           responseJson = jsonDecode(response);
-          dateTime = responseJson.map((e){
-            return DateTime.parse(e);
-          }).first;
+          dateTime = DateTime.parse(responseJson);
           return dateTime;
         }
       ).onError((error, stackTrace){
