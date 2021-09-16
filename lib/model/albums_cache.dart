@@ -50,8 +50,8 @@ class AlbumsCache{
     );
   }
 
-  Stream<DateTime> getLastDate (){
-    DateTime dateTime;
+  Stream<DateTime?> getLastDate (){
+    DateTime? dateTime;
     String dateString;
     return Stream.fromFuture(
       SharedPreferences.getInstance().then(
