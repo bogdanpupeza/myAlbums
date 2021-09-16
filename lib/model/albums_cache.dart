@@ -60,7 +60,9 @@ class AlbumsCache{
           dateTime = DateTime.parse(dateString);
           return dateTime;
         }
-      )
+      ).onError((error, stackTrace){
+        return null;
+      })
     );
   }
 
@@ -76,7 +78,9 @@ class AlbumsCache{
           }).toList();
           return favorites;
         }
-      )
+      ).onError((error, stackTrace){
+        return [];
+      })
     );
   }
 
