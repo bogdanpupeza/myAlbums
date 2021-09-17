@@ -21,7 +21,7 @@ class AlbumsCache{
           return albumsList;
         }
       ).onError((error, stackTrace){
-        return [];
+        throw Error(); 
       })
     );
   }
@@ -35,7 +35,7 @@ class AlbumsCache{
           }).toList()
         );
         pref.setString(_albumsCacheListKey, jsonData);
-        return pref;
+        //return pref;
       }
     );
   }
@@ -45,7 +45,7 @@ class AlbumsCache{
       (pref){
         String dateString = dateTime.toIso8601String();
         pref.setString(_dateKey, dateString);
-        return pref;
+        //return pref;
       }
     );
   }
@@ -79,7 +79,7 @@ class AlbumsCache{
           return favorites;
         }
       ).onError((error, stackTrace){
-        return [];
+        throw Error();
       })
     );
   }
@@ -92,7 +92,7 @@ class AlbumsCache{
             return albumId.toString();
           }).toList();
         pref.setStringList(_favoritesKey, ids);
-        return pref;
+        //return pref;
       }
     );
   }

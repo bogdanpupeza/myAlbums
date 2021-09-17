@@ -1,7 +1,6 @@
 import 'dart:io';
 
 import 'package:rxdart/rxdart.dart';
-
 import '../model/albums_cache.dart';
 import '../model/albums_service.dart';
 import '../model/albums.dart';
@@ -33,6 +32,10 @@ class AlbumsRepository{
     return actualFavorites;
   }
 
+  Stream<List<int>> getFavorites(){
+    return albumsCache.getFavorites();
+  }
+
   Stream<AlbumsResponse> getAlbums(){
     _lastUpdate = DateTime.now();
     
@@ -46,12 +49,15 @@ class AlbumsRepository{
     }).onErrorResume(
       (error, stackTrace){
         if(error is SocketException){
-          return albumsCache.getAlbums();
+          return dateStream.flatMap((date){
+            _lastUpdate = date;
+            return albumsCache.getAlbums();
+          });
         }
         throw error;
       }
     );
-    
+
     return albumsStream.map((albumsList){
       return AlbumsResponse(albums: albumsList, lastUpdate: _lastUpdate);
     });

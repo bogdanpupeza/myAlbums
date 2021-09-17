@@ -11,21 +11,28 @@ class HomeScreen extends StatefulWidget {
   _HomeScreenState createState() => _HomeScreenState();
 }
 
-
-
 extension on Duration{
   String get showLastUpdate{
     String duration = "";
     if(this.inDays > 0){
       duration += "${(this.inDays.toString())} days ";
     } else {
-      if(this.inMinutes > 0){
-        int minutes = this.inMinutes % 60;
-        duration += "${(minutes.toString())} minutes ";
-      }
-      if(this.inSeconds >= 0){
-        int seconds = this.inSeconds % 60;
-        duration += "${(seconds.toString())} seconds";
+      if(this.inHours > 0) {
+        int hours = this.inHours % 24;
+        duration += "${(hours.toString())} hours ";
+        if(this.inMinutes > 0){
+          int minutes = this.inMinutes % 60;
+          duration += "${(minutes.toString())} minutes ";
+        }
+      } else {
+        if(this.inMinutes > 0){
+          int minutes = this.inMinutes % 60;
+          duration += "${(minutes.toString())} minutes ";
+        }
+        if(this.inSeconds >= 0){
+          int seconds = this.inSeconds % 60;
+          duration += "${(seconds.toString())} seconds";
+        }
       }
     }
     return duration;
