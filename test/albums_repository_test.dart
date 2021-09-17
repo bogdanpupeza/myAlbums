@@ -8,7 +8,7 @@ void main(){
   AlbumsService albumsService = AlbumsService();
   AlbumsCache albumsCache = AlbumsCache();
   AlbumsRepository albumsRepository = AlbumsRepository(albumsService, albumsCache);
-  List<Album> albumsId = [];
+  List<int> albumsId = [];
   List<Album> albums = [];
   for(int i = 1; i <= 100; ++i) {
     albumsId.add(i);
