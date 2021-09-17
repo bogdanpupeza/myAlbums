@@ -1,10 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:my_albums6/model/albums.dart';
+import 'package:my_albums6/view/album.dart';
+import 'package:my_albums6/view_model/albums_view_model.dart';
 import 'package:rxdart/rxdart.dart';
-import 'package:intl/intl.dart';
-
-import '../model/albums.dart';
-import './album.dart';
-import '../view_model/albums_view_model.dart';
 
 class HomeScreen extends StatefulWidget {
   @override

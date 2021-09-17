@@ -1,6 +1,6 @@
 import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
-import '../model/albums.dart';
+import 'package:my_albums6/model/albums.dart';
 
 class AlbumsCache{
   final String _albumsCacheListKey = "albumsList";

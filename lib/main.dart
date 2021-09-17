@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import './view/home_screen.dart';
+import 'package:my_albums6/view/home_screen.dart';
 
 void main() {
   runApp(MyApp());

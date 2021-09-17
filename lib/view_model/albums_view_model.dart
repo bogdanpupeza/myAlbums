@@ -1,8 +1,8 @@
+import 'package:my_albums6/model/albums.dart';
+import 'package:my_albums6/model/albums_cache.dart';
+import 'package:my_albums6/model/albums_repository.dart';
+import 'package:my_albums6/model/albums_service.dart';
 import 'package:rxdart/rxdart.dart';
-import '../model/albums_cache.dart';
-import '../model/albums.dart';
-import '../model/albums_repository.dart';
-import '../model/albums_service.dart';
 
 class AlbumsVM{
   final albumsRepository = AlbumsRepository(AlbumsService(),AlbumsCache());

@@ -2,7 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 import 'package:http/http.dart' as http;
-import '../model/albums.dart';
+import 'package:my_albums6/model/albums.dart';
 
 class AlbumsService {
   final String _url = "https://jsonplaceholder.typicode.com/albums";
