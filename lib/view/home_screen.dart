@@ -1,25 +1,59 @@
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
-import 'package:my_albums6/model/albums.dart';
-import 'package:my_albums6/view/album.dart';
-import 'package:my_albums6/view_model/albums_view_model.dart';
-import 'package:pull_to_refresh/pull_to_refresh.dart';
 import 'package:rxdart/rxdart.dart';
+import 'package:intl/intl.dart';
+
+import '../model/albums.dart';
+import './album.dart';
+import '../view_model/albums_view_model.dart';
 
 class HomeScreen extends StatefulWidget {
   @override
   _HomeScreenState createState() => _HomeScreenState();
 }
 
+extension on Duration{
+  String get showLastUpdate{
+    String duration = "";
+    if(this.inDays > 0){
+      duration += "${(this.inDays.toString())} days ";
+    } else {
+      if(this.inHours > 0) {
+        int hours = this.inHours % 24;
+        duration += "${(hours.toString())} hours ";
+        if(this.inMinutes > 0){
+          int minutes = this.inMinutes % 60;
+          duration += "${(minutes.toString())} minutes ";
+        }
+      } else {
+        if(this.inMinutes > 0){
+          int minutes = this.inMinutes % 60;
+          duration += "${(minutes.toString())} minutes ";
+        }
+        if(this.inSeconds >= 0){
+          int seconds = this.inSeconds % 60;
+          duration += "${(seconds.toString())} seconds";
+        }
+      }
+    }
+    return duration;
+  }
+}
+
+
 class _HomeScreenState extends State<HomeScreen> {
   AlbumsVM albumsVM = AlbumsVM(
-    Input(BehaviorSubject<bool>()),
+    Input(
+      BehaviorSubject<bool>(),
+      BehaviorSubject<int>(),
+    ),
   );
+
   void getAlbums() {
-    print("AA");
-    setState(() {
-      albumsVM.input.loadData.add(true);
-    });
+   albumsVM.input.loadData.add(true);
+  }
+
+  void toggleFavorite(int albumId){
+    albumsVM.input.toggleFavorite.add(albumId);
   }
 
   @override
@@ -30,44 +64,48 @@ class _HomeScreenState extends State<HomeScreen> {
       ),
       body: Center(
         child: GestureDetector(
-          child: StreamBuilder(
-              stream: albumsVM.output.stream,
+          child: StreamBuilder<AlbumsResponse>(
+              stream: albumsVM.output.albumsDataStream,
               builder: (ctx, snapshot) {
-                if(snapshot.data != null){
-                  var data = snapshot.data as AlbumsResponse;
-                  var albums = data.albums;
-                  var lastUpdate = data.lastUpdate;
-                  var difference = lastUpdate.difference(DateTime.now());
-                return snapshot.connectionState == ConnectionState.waiting
-                ?  Center(child: CircularProgressIndicator(),)
-                :  Column(
-                  children: [
-                    Text(
-                      "Last update at: ${(DateFormat.Hms().format(lastUpdate))}"
-                    ),
-                    Expanded(
-                      //height: 640,
-                      child: ListView.builder(
-                        itemCount: albums.length,
-                        itemBuilder: (ctx, index) {
-                          return AlbumWidget(
-                            name: albums[index].name,
-                            id: albums[index].id,
-                            userId: albums[index].userId,
-                          );
-                        },
-    
-                      ),
-                    ),
-                  ],
-                );
+                if (snapshot.connectionState == ConnectionState.waiting)
+                  return Center(
+                    child: CircularProgressIndicator(),
+                  );
+                else {
+                  if (snapshot.data != null) {
+                    var data = snapshot.data as AlbumsResponse;
+                    var albums = data.albums;
+                    var lastUpdate = data.lastUpdate;
+                    Duration duration = Duration();
+                    if(lastUpdate != null)
+                      duration = DateTime.now().difference(lastUpdate);
+                    return Column(
+                      children: [
+                        if (duration.inSeconds >= 5)
+                          Text("Results updated ${(duration.showLastUpdate)} ago"),
+                        if (duration.inSeconds < 5)
+                          Text("Results updated just now"),
+                        Expanded(
+                          child: ListView.builder(
+                            itemCount: albums.length,
+                            itemBuilder: (ctx, index) {
+                              return AlbumWidget(
+                                toggleFavorite: toggleFavorite,
+                                isFavorite: albums[index].favorite,
+                                name: albums[index].name,
+                                id: albums[index].id,
+                                userId: albums[index].userId,
+                              );
+                            },
+                          ),
+                        ),
+                      ],
+                    );
+                  } else
+                    return (Text("There are no albums"));
                 }
-                else
-                  return (Text("Double Tap for Updates"));
               }),
-          //insert a better function:
           onDoubleTap: getAlbums,
-
         ),
       ),
     );
