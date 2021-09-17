@@ -91,7 +91,7 @@ class AlbumsCache{
           favorites.map((albumId){
             return albumId.toString();
           }).toList();
-        pref.setStringList(_albumsCacheListKey, ids);
+        pref.setStringList(_favoritesKey, ids);
         return pref;
       }
     );
