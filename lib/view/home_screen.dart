@@ -52,12 +52,9 @@ class _HomeScreenState extends State<HomeScreen> {
    albumsVM.input.loadData.add(true);
   }
 
-
   void toggleFavorite(int albumId){
     albumsVM.input.toggleFavorite.add(albumId);
   }
-
-  
 
   @override
   Widget build(BuildContext context) {
@@ -84,8 +81,10 @@ class _HomeScreenState extends State<HomeScreen> {
                       duration = DateTime.now().difference(lastUpdate);
                     return Column(
                       children: [
-                        if (duration != null)
+                        if (duration.inSeconds >= 5)
                           Text("Results updated ${(duration.showLastUpdate)} ago"),
+                        if (duration.inSeconds < 5)
+                          Text("Results updated just now"),
                         Expanded(
                           child: ListView.builder(
                             itemCount: albums.length,
