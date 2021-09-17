@@ -8,8 +8,10 @@ void main(){
   AlbumsService albumsService = AlbumsService();
   AlbumsCache albumsCache = AlbumsCache();
   AlbumsRepository albumsRepository = AlbumsRepository(albumsService, albumsCache);
+  List<Album> albumsId = [];
   List<Album> albums = [];
-  for(int i = 1; i < 100; ++i) {
+  for(int i = 1; i <= 100; ++i) {
+    albumsId.add(i);
     albums.add(
       Album(
         id: i,
@@ -19,10 +21,14 @@ void main(){
       )
     );
   }
-  test("", (){
+  test("Test for getting albums", (){
     expect(
-      albumsRepository.getAlbums(),
-      emits(AlbumsResponse.fromAlbums(albums, DateTime.now)),
+      albumsRepository.getAlbums().map((albumsResponse){
+        return albumsResponse.albums.map((album){
+          return album.id;
+        }).toList();
+      }),
+      emits(albumsId),
     );
   });
 }
