@@ -35,7 +35,6 @@ class AlbumsCache{
           }).toList()
         );
         pref.setString(_albumsCacheListKey, jsonData);
-        //return pref;
       }
     );
   }
@@ -45,7 +44,6 @@ class AlbumsCache{
       (pref){
         String dateString = dateTime.toIso8601String();
         pref.setString(_dateKey, dateString);
-        //return pref;
       }
     );
   }
@@ -92,7 +90,6 @@ class AlbumsCache{
             return albumId.toString();
           }).toList();
         pref.setStringList(_favoritesKey, ids);
-        //return pref;
       }
     );
   }
