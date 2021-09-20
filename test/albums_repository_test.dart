@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/annotations.dart';
 import 'package:my_albums6/model/albums.dart';
@@ -26,9 +27,7 @@ void main() {
       favorite: i % 2 == 0,
       userId: i % 30,
     ));
-
-    if(i % 2 == 0)
-      favorites.add(i);
+    if (i % 2 == 0) favorites.add(i);
   }
 
   DateTime date = DateTime.now();
@@ -36,44 +35,46 @@ void main() {
     albums: albums,
     lastUpdate: date,
   );
-  
-  test("Test for getting albums from Service", () {
-    when(albumsCache.getLastDate()).thenAnswer((_) {
-      return Stream.value(date);
-    });
-    when(albumsService.getAlbums()).thenAnswer((_) {
-      return Stream.value(albums);
+
+  group("Tests for getting albums ", () {
+    test("from Service", () {
+      when(albumsCache.getLastDate()).thenAnswer((_) {
+        return Stream.value(date);
+      });
+      when(albumsService.getAlbums()).thenAnswer((_) {
+        return Stream.value(albums);
+      });
+      expect(
+          albumsRepository.getAlbums().map((albumsResponse2) {
+            return albumsResponse2.albums;
+          }),
+          emits(albumsResponse.albums));
+      albumsCache.setAlbums(albums);
+      albumsCache.setDate(date);
     });
 
-    expect(albumsRepository.getAlbums().map((albumsResponse2){
-      return albumsResponse2.albums;
-    }), emits(albumsResponse.albums));
-    albumsCache.setAlbums(albums);
-    albumsCache.setDate(date);
+    test("from Cache", () {
+      when(albumsCache.getLastDate()).thenAnswer((_) {
+        return Stream.value(date);
+      });
+      when(albumsCache.getAlbums()).thenAnswer((_) {
+        return Stream.value(albums);
+      });
+      when(albumsService.getAlbums())
+          .thenAnswer((_) => Stream.error(SocketException("")));
+      expect(
+        albumsRepository.getAlbums().map((albumsResponse2) {
+          return albumsResponse2.albums;
+        }),
+        emits(albumsResponse.albums),
+      );
+    });
   });
-
-  test("Test for getting albums from Cache", () {
-    when(albumsCache.getLastDate()).thenAnswer((_) {
-      return Stream.value(date);
-    });
-    when(albumsCache.getAlbums()).thenAnswer((_) {
-      return Stream.value(albums);
-    });
-    when(albumsService.getAlbums()).thenAnswer((_) => Stream<List<Album>>.error(SocketException));
-
-   expect(albumsRepository.getAlbums(), emits(albumsResponse));
-    
-  });
-
-
 
   test("Test for getting favorites", () {
     when(albumsCache.getFavorites()).thenAnswer((_) {
       return Stream.value(favorites);
     });
     expect(albumsRepository.toggleAlbum(1), emits(favorites));
-    //albumsCache.setFavorites(favorites);
   });
-
-
 }
