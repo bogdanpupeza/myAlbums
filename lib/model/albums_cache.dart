@@ -93,6 +93,4 @@ class AlbumsCache{
       }
     );
   }
-
-  
 }

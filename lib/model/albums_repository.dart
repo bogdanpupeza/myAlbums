@@ -40,7 +40,7 @@ class AlbumsRepository {
     Stream<DateTime?> dateStream = albumsCache.getLastDate();
 
     Stream<List<Album>> albumsStream =
-        albumsService.getAlbums().map((albumsList) {
+    albumsService.getAlbums().map((albumsList) {
       albumsCache.setAlbums(albumsList);
       albumsCache.setDate(DateTime.now());
       return albumsList;
@@ -53,7 +53,6 @@ class AlbumsRepository {
       }
       throw error;
     });
-
     return albumsStream.flatMap((albumsList) {
       return Stream.value(
           AlbumsResponse(albums: albumsList, lastUpdate: _lastUpdate));
